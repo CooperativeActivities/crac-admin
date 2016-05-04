@@ -34,6 +34,7 @@ public class CustomerEditor extends VerticalLayout {
 	 * The currently edited customer
 	 */
 	private CracUser customer;
+	private JsonConnector jsonConn = new JsonConnector("dev", "testPass!", CracUser.class, CracUser[].class);
 
 	/* Fields to edit properties in Customer entity */
 	TextField name = new TextField("name");
@@ -66,6 +67,7 @@ public class CustomerEditor extends VerticalLayout {
 
 		// wire action buttons to save, delete and reset
 		save.addClickListener(e -> repository.save(customer));
+		save.addClickListener(e -> jsonConn.post("http://localhost:8080/user", customer));
 		delete.addClickListener(e -> repository.delete(customer));
 		cancel.addClickListener(e -> editCustomer(customer));
 		setVisible(false);

@@ -1,5 +1,7 @@
 package crac.admin;
 
+import crac.admin.models.*;
+
 import java.util.Date;
 import java.util.Set;
 
@@ -18,7 +20,7 @@ import crac.admin.models.Role;
  */
 
 @Entity
-public class CracUser {
+public class CracUser{
 	
 	@Id
 	@GeneratedValue

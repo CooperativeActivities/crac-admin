@@ -1,5 +1,6 @@
 package crac.admin;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,16 +41,16 @@ public class VaadinUI extends UI {
 		this.grid = new Grid();
 		this.filter = new TextField();
 		this.addNewBtn = new Button("New User", FontAwesome.PLUS);
-		//TODO
-		this.jsonConn = new JsonConnector();
+		this.jsonConn = new JsonConnector("dev", "testPass!", CracUser.class, CracUser[].class);
 	}
 
 	@Override
 	protected void init(VaadinRequest request) {
-		//TODO
-		this.jsonConn.index();
-		CracUser myUser = new CracUser("asd", "asd", "asd", "asd", "asd", new Date(), "asd", "+43", "asd");
-		this.repo.save(myUser);
+		// Load the users from the database
+		CracUser[] userList = (CracUser[]) this.jsonConn.index("http://localhost:8080/user");
+		for(CracUser user : userList){
+			this.repo.save(user);
+		}
 		// build layout
 		HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
 		VerticalLayout mainLayout = new VerticalLayout(actions, grid, editor);
