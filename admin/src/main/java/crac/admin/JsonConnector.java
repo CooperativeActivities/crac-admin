@@ -14,20 +14,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JsonConnector<T>{
 
+	private String base;
 	protected HttpHeaders header;
 	final Class<T> myClass;
 	final Class<T[]> myClassArray;
 	RestTemplate restTemplate;
 	
-	public JsonConnector(String name, String password, Class<T> myClass, Class<T[]> myClassArray){
+	public JsonConnector(String name, String password, String base, Class<T> myClass, Class<T[]> myClassArray){
 		this.header = this.createHeaders(name, password);
+		this.base = base;
 		this.myClass = myClass;
 		this.myClassArray = myClassArray;
 		this.restTemplate = new RestTemplate();
 	}
 
 	public T[] index(String url) {		
-		ResponseEntity<T[]> objects = this.restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Object>(header), myClassArray);
+		ResponseEntity<T[]> objects = this.restTemplate.exchange(this.base+url, HttpMethod.GET, new HttpEntity<Object>(header), myClassArray);
 		return objects.getBody();
 	}
 
@@ -36,10 +38,32 @@ public class JsonConnector<T>{
 	}
 
 	public void put(String url, T object) {
-
+		ObjectMapper mapper = new ObjectMapper();
+		HttpEntity<String> entity = null;
+		try {
+			System.out.println(mapper.writeValueAsString(object));
+			entity = new HttpEntity<String>(mapper.writeValueAsString(object), header);
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		this.restTemplate.exchange(this.base+url, HttpMethod.PUT, entity, String.class);
 	}
 
 	public void post(String url, T object) {
+		ObjectMapper mapper = new ObjectMapper();
+		HttpEntity<String> entity = null;
+		try {
+			entity = new HttpEntity<String>(mapper.writeValueAsString(object), header);
+			System.out.println(mapper.writeValueAsString(object));
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		this.restTemplate.exchange(this.base+url, HttpMethod.POST, entity, String.class);
+	}
+
+	public void delete(String url, T object) {
 		ObjectMapper mapper = new ObjectMapper();
 		HttpEntity<String> entity = null;
 		try {
@@ -48,17 +72,7 @@ public class JsonConnector<T>{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		try {
-			System.out.println(mapper.writeValueAsString(object));
-		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		//this.restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
-	}
-
-	public void delete(String url, T object) {
-
+		this.restTemplate.exchange(this.base+url, HttpMethod.DELETE, entity, String.class);
 	}
 	
 	protected HttpHeaders createHeaders(final String username, final String password ){

@@ -11,6 +11,7 @@ import javax.persistence.Id;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import crac.admin.models.Role;
@@ -20,37 +21,35 @@ import crac.admin.models.Role;
  */
 
 @Entity
-public class CracUser{
-	
+public class CracUser {
+
 	@Id
-	@GeneratedValue
 	private Long id;
 	
 	private String name;
-	
+
 	private String email;
-	
+
 	private String password;
 
 	private String firstName;
 
 	private String lastName;
-	
-	private Date birthDate;
-	
-	private String status;
-	
-	private String phone;
-	
-	private String address;
-	
-	private Role role;
 
+	private Date birthDate;
+
+	private String status;
+
+	private String phone;
+
+	private String address;
+
+	private Role role;
 
 	protected CracUser() {
 	}
-
-		public CracUser(String name, String email, String password, String firstName, String lastName, Date birthDate,
+	
+	public CracUser(String name, String email, String password, String firstName, String lastName, Date birthDate,
 			String status, String phone, String address) {
 		super();
 		this.name = name;
@@ -63,8 +62,12 @@ public class CracUser{
 		this.phone = phone;
 		this.address = address;
 	}
+		
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-		public Long getId() {
+	public Long getId() {
 		return id;
 	}
 
@@ -83,23 +86,14 @@ public class CracUser{
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
 	}
-	
 
 	public Date getBirthDate() {
 		return birthDate;
 	}
 
-
-
-
-
 	public void setBirthDate(Date birthDate) {
 		this.birthDate = birthDate;
 	}
-
-
-
-
 
 	public String getName() {
 		return name;
@@ -117,6 +111,7 @@ public class CracUser{
 		this.email = email;
 	}
 
+	@JsonIgnore
 	public String getPassword() {
 		return password;
 	}
@@ -124,8 +119,6 @@ public class CracUser{
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	
-	
 
 	public String getStatus() {
 		return status;
@@ -134,7 +127,7 @@ public class CracUser{
 	public void setStatus(String status) {
 		this.status = status;
 	}
-	
+
 	public String getPhone() {
 		return phone;
 	}
@@ -161,8 +154,7 @@ public class CracUser{
 
 	@Override
 	public String toString() {
-		return String.format("Customer[id=%d, firstName='%s', lastName='%s']", id,
-				firstName, lastName);
+		return String.format("Customer[id=%d, firstName='%s', lastName='%s']", id, firstName, lastName);
 	}
 
 }

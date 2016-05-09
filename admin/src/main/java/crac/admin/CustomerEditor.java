@@ -8,12 +8,15 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+
+import crac.admin.models.Role;
 
 /**
  * A simple example to introduce building forms. As your real application is
@@ -34,7 +37,7 @@ public class CustomerEditor extends VerticalLayout {
 	 * The currently edited customer
 	 */
 	private CracUser customer;
-	private JsonConnector jsonConn = new JsonConnector("dev", "testPass!", CracUser.class, CracUser[].class);
+	private JsonConnector jsonConn = new JsonConnector("frontend", "frontendKey", "http://localhost:8080", CracUser.class, CracUser[].class);
 
 	/* Fields to edit properties in Customer entity */
 	TextField name = new TextField("name");
@@ -46,18 +49,23 @@ public class CustomerEditor extends VerticalLayout {
 	TextField status = new TextField("status");
 	TextField phone = new TextField("phone");
 	TextField address = new TextField("address");
+	ComboBox role = new ComboBox("role");
 
 	/* Action buttons */
 	Button save = new Button("Save", FontAwesome.SAVE);
+	Button update = new Button("Update", FontAwesome.ADJUST);
 	Button cancel = new Button("Cancel");
 	Button delete = new Button("Delete", FontAwesome.TRASH_O);
-	CssLayout actions = new CssLayout(save, cancel, delete);
+	CssLayout actions = new CssLayout(save, update, cancel, delete);
 
 	@Autowired
 	public CustomerEditor(CustomerRepository repository) {
 		this.repository = repository;
+		
+		role.addItem(Role.USER);
+		role.addItem(Role.ADMIN);
 
-		addComponents(name, email, password, firstName, lastName, birthDate, status, phone, address, actions);
+		addComponents(name, email, password, firstName, lastName, birthDate, status, phone, address, role, actions);
 
 		// Configure and style components
 		setSpacing(true);
@@ -66,9 +74,12 @@ public class CustomerEditor extends VerticalLayout {
 		save.setClickShortcut(ShortcutAction.KeyCode.ENTER);
 
 		// wire action buttons to save, delete and reset
-		save.addClickListener(e -> repository.save(customer));
-		save.addClickListener(e -> jsonConn.post("http://localhost:8080/user", customer));
-		delete.addClickListener(e -> repository.delete(customer));
+		save.addClickListener(e -> jsonConn.post("/user", customer));
+		save.addClickListener(e -> repoReload());
+		update.addClickListener(e -> jsonConn.put("/user/"+customer.getId(), customer));
+		update.addClickListener(e -> repoReload());
+		delete.addClickListener(e -> jsonConn.delete("/user/"+customer.getId(), customer));
+		delete.addClickListener(e -> repoReload());
 		cancel.addClickListener(e -> editCustomer(customer));
 		setVisible(false);
 	}
@@ -76,6 +87,14 @@ public class CustomerEditor extends VerticalLayout {
 	public interface ChangeHandler {
 
 		void onChange();
+	}
+	
+	public void repoReload(){
+		repository.deleteAll();
+		CracUser[] userList = (CracUser[]) this.jsonConn.index("/user");
+		for(CracUser user : userList){
+			this.repository.save(user);
+		}
 	}
 
 	public final void editCustomer(CracUser c) {
@@ -106,7 +125,9 @@ public class CustomerEditor extends VerticalLayout {
 		// ChangeHandler is notified when either save or delete
 		// is clicked
 		save.addClickListener(e -> h.onChange());
+		update.addClickListener(e -> h.onChange());
 		delete.addClickListener(e -> h.onChange());
+		cancel.addClickListener(e -> h.onChange());
 	}
 
 }

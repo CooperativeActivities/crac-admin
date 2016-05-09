@@ -41,13 +41,14 @@ public class VaadinUI extends UI {
 		this.grid = new Grid();
 		this.filter = new TextField();
 		this.addNewBtn = new Button("New User", FontAwesome.PLUS);
-		this.jsonConn = new JsonConnector("dev", "testPass!", CracUser.class, CracUser[].class);
+		this.jsonConn = new JsonConnector("frontend", "frontendKey", "http://localhost:8080", CracUser.class, CracUser[].class);
 	}
 
 	@Override
 	protected void init(VaadinRequest request) {
 		// Load the users from the database
-		CracUser[] userList = (CracUser[]) this.jsonConn.index("http://localhost:8080/user");
+		this.repo.deleteAll();
+		CracUser[] userList = (CracUser[]) this.jsonConn.index("/user");
 		for(CracUser user : userList){
 			this.repo.save(user);
 		}
@@ -61,18 +62,18 @@ public class VaadinUI extends UI {
 		mainLayout.setMargin(true);
 		mainLayout.setSpacing(true);
 
-		grid.setHeight(300, Unit.PIXELS);
-		grid.setWidth(900, Unit.PIXELS);
+		grid.setHeight(90, Unit.PERCENTAGE);
+		grid.setWidth(100, Unit.PERCENTAGE);
 		grid.addColumn("id");
 		grid.addColumn("name");
 		grid.addColumn("email");
-		grid.addColumn("password");
 		grid.addColumn("lastName");
 		grid.addColumn("firstName");
 		grid.addColumn("birthDate");
 		grid.addColumn("status");
 		grid.addColumn("phone");
 		grid.addColumn("address");
+		grid.addColumn("role");
 
 		filter.setInputPrompt("Filter by last name");
 
@@ -92,7 +93,12 @@ public class VaadinUI extends UI {
 		});
 
 		// Instantiate and edit new Customer the new button is clicked
-		addNewBtn.addClickListener(e -> editor.editCustomer(new CracUser("", "", "", "", "", new Date(), "", "+43", "")));
+		addNewBtn.addClickListener(e -> {
+			editor.editCustomer(new CracUser("", "", "", "", "", new Date(), "", "+43", ""));
+			//newUser.setId(this.repo.getMaxId() + 1);
+			//System.out.println(this.repo.getMaxId() + 1);
+			//editor.editCustomer(newUser);
+			});
 
 		// Listen changes made by the editor, refresh data from backend
 		editor.setChangeHandler(() -> {
