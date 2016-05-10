@@ -1,4 +1,4 @@
-package crac.admin;
+package crac.admin.views;
 
 import java.util.Date;
 
@@ -16,27 +16,44 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Button.ClickEvent;
+
+import crac.admin.daos.CustomerRepository;
+import crac.admin.daos.TaskRepository;
+import crac.admin.editors.CustomerEditor;
+import crac.admin.editors.TaskEditor;
+import crac.admin.models.CracUser;
+import crac.admin.models.JsonConnector;
+import crac.admin.models.Task;
+
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
-public class UserView extends VerticalLayout implements View {
+public class TaskView extends VerticalLayout implements View {
 	
-    public UserView(Navigator navigator, CustomerRepository repo) {
-    	CustomerEditor editor = new CustomerEditor(repo);
+    public TaskView(Navigator navigator, TaskRepository repo) {
+    	TaskEditor editor = new TaskEditor(repo);
     	Grid grid = new Grid();
     	TextField filter = new TextField();
-		Button addNewBtn = new Button("New User", FontAwesome.PLUS);
-		JsonConnector jsonConn = new JsonConnector("frontend", "frontendKey", "http://localhost:8080", CracUser.class, CracUser[].class);
+		Button addNewBtn = new Button("New Task", FontAwesome.PLUS);
+		JsonConnector jsonConn = new JsonConnector("frontend", "frontendKey", "http://localhost:8080", Task.class, Task[].class);
 		
 		
 		repo.deleteAll();
-		CracUser[] userList = (CracUser[]) jsonConn.index("/user");
-		for(CracUser user : userList){
-			repo.save(user);
+		Task[] taskList = (Task[]) jsonConn.index("/task");
+		for(Task task : taskList){
+			repo.save(task);
 		}
 		
-		HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
+		Button menuButton = new Button("Back",
+                new Button.ClickListener() {
+            @Override
+            public void buttonClick(ClickEvent event) {
+                navigator.navigateTo("/");
+            }
+        });
+		
+		HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn, menuButton);
 		VerticalLayout mainLayout = new VerticalLayout(actions, grid, editor);
 		addComponent(mainLayout);
 
@@ -48,21 +65,20 @@ public class UserView extends VerticalLayout implements View {
 		grid.setWidth(100, Unit.PERCENTAGE);
 		grid.addColumn("id");
 		grid.addColumn("name");
-		grid.addColumn("email");
-		grid.addColumn("lastName");
-		grid.addColumn("firstName");
-		grid.addColumn("birthDate");
-		grid.addColumn("status");
-		grid.addColumn("phone");
-		grid.addColumn("address");
-		grid.addColumn("role");
+		grid.addColumn("description");
+		grid.addColumn("location");
+		grid.addColumn("startTime");
+		grid.addColumn("endTime");
+		grid.addColumn("urgency");
+		grid.addColumn("amountOfVolunteers");
+		grid.addColumn("feedback");
 		
-		filter.setInputPrompt("Filter by last name");
+		filter.setInputPrompt("Filter by name");
 
 		// Hook logic to components
 
 		// Replace listing with filtered content when user changes filter
-		filter.addTextChangeListener(e -> listCustomers(e.getText(), grid, repo));
+		filter.addTextChangeListener(e -> listTasks(e.getText(), grid, repo));
 
 		
 		// Connect selected Customer to editor or hide if none is selected
@@ -71,13 +87,13 @@ public class UserView extends VerticalLayout implements View {
 				editor.setVisible(false);
 			}
 			else {
-				editor.editCustomer((CracUser) grid.getSelectedRow());
+				editor.editCustomer((Task) grid.getSelectedRow());
 			}
 		});
 
 		// Instantiate and edit new Customer the new button is clicked
 		addNewBtn.addClickListener(e -> {
-			editor.editCustomer(new CracUser("", "", "", "", "", new Date(), "", "+43", ""));
+			editor.editCustomer(new Task("", "", "", new Date(), new Date(), 0, 0, ""));
 			//newUser.setId(this.repo.getMaxId() + 1);
 			//System.out.println(this.repo.getMaxId() + 1);
 			//editor.editCustomer(newUser);
@@ -86,11 +102,11 @@ public class UserView extends VerticalLayout implements View {
 		// Listen changes made by the editor, refresh data from backend
 		editor.setChangeHandler(() -> {
 			editor.setVisible(false);
-			listCustomers(filter.getValue(), grid, repo);
+			listTasks(filter.getValue(), grid, repo);
 		});
 
 		// Initialize listing
-		listCustomers(null, grid, repo);
+		listTasks(null, grid, repo);
 		
 
 		
@@ -98,19 +114,19 @@ public class UserView extends VerticalLayout implements View {
 		
     }
     
-    private void listCustomers(String text, Grid grid, CustomerRepository repo) {
+    private void listTasks(String text, Grid grid, TaskRepository repo) {
 		if (StringUtils.isEmpty(text)) {
 			grid.setContainerDataSource(
-					new BeanItemContainer(CracUser.class, repo.findAll()));
+					new BeanItemContainer(Task.class, repo.findAll()));
 		}
 		else {
-			grid.setContainerDataSource(new BeanItemContainer(CracUser.class,
-					repo.findByLastNameStartsWithIgnoreCase(text)));
+			grid.setContainerDataSource(new BeanItemContainer(Task.class,
+					repo.findByNameStartsWithIgnoreCase(text)));
 		}
 	}
 
     @Override
     public void enter(ViewChangeEvent event) {
-        Notification.show("Welcome to the Animal Farm");
+        Notification.show("Manage and change tasks here!");
     }
 }

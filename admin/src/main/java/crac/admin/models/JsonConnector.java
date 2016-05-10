@@ -1,4 +1,4 @@
-package crac.admin;
+package crac.admin.models;
 
 import java.nio.charset.Charset;
 

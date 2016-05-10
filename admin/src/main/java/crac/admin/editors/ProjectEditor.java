@@ -1,4 +1,4 @@
-package crac.admin;
+package crac.admin.editors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -16,7 +16,12 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import crac.admin.daos.CustomerRepository;
+import crac.admin.daos.ProjectRepository;
+import crac.admin.models.CracUser;
+import crac.admin.models.JsonConnector;
 import crac.admin.models.Role;
+import crac.admin.models.Project;
 
 /**
  * A simple example to introduce building forms. As your real application is
@@ -29,27 +34,22 @@ import crac.admin.models.Role;
  */
 @SpringComponent
 @UIScope
-public class CustomerEditor extends VerticalLayout {
+public class ProjectEditor extends VerticalLayout {
 
-	private final CustomerRepository repository;
+	private final ProjectRepository repository;
 
 	/**
 	 * The currently edited customer
 	 */
-	private CracUser customer;
-	private JsonConnector jsonConn = new JsonConnector("frontend", "frontendKey", "http://localhost:8080", CracUser.class, CracUser[].class);
+	private Project myProject;
+	private JsonConnector jsonConn = new JsonConnector("frontend", "frontendKey", "http://localhost:8080", Project.class, Project[].class);
 
 	/* Fields to edit properties in Customer entity */
 	TextField name = new TextField("name");
-	TextField email = new TextField("email");
-	PasswordField password = new PasswordField("password");
-	TextField lastName = new TextField("Last name");
-	TextField firstName = new TextField("First name");
-	DateField birthDate = new DateField("Birthdate");
-	TextField status = new TextField("status");
-	TextField phone = new TextField("phone");
-	TextField address = new TextField("address");
-	ComboBox role = new ComboBox("role");
+	TextField description = new TextField("description");
+	TextField location = new TextField("location");
+	DateField startTime = new DateField("Start-time");
+	DateField endTime = new DateField("End-time");
 
 	/* Action buttons */
 	Button save = new Button("Save", FontAwesome.SAVE);
@@ -59,13 +59,10 @@ public class CustomerEditor extends VerticalLayout {
 	CssLayout actions = new CssLayout(save, update, cancel, delete);
 
 	@Autowired
-	public CustomerEditor(CustomerRepository repository) {
+	public ProjectEditor(ProjectRepository repository) {
 		this.repository = repository;
 		
-		role.addItem(Role.USER);
-		role.addItem(Role.ADMIN);
-
-		addComponents(name, email, password, firstName, lastName, birthDate, status, phone, address, role, actions);
+		addComponents(name, description, location, startTime, endTime, actions);
 
 		// Configure and style components
 		setSpacing(true);
@@ -74,13 +71,13 @@ public class CustomerEditor extends VerticalLayout {
 		save.setClickShortcut(ShortcutAction.KeyCode.ENTER);
 
 		// wire action buttons to save, delete and reset
-		save.addClickListener(e -> jsonConn.post("/user", customer));
+		save.addClickListener(e -> jsonConn.post("/project", myProject));
 		save.addClickListener(e -> repoReload());
-		update.addClickListener(e -> jsonConn.put("/user/"+customer.getId(), customer));
+		update.addClickListener(e -> jsonConn.put("/project/"+myProject.getId(), myProject));
 		update.addClickListener(e -> repoReload());
-		delete.addClickListener(e -> jsonConn.delete("/user/"+customer.getId(), customer));
+		delete.addClickListener(e -> jsonConn.delete("/project/"+myProject.getId(), myProject));
 		delete.addClickListener(e -> repoReload());
-		cancel.addClickListener(e -> editCustomer(customer));
+		cancel.addClickListener(e -> editCustomer(myProject));
 		setVisible(false);
 	}
 
@@ -91,27 +88,27 @@ public class CustomerEditor extends VerticalLayout {
 	
 	public void repoReload(){
 		repository.deleteAll();
-		CracUser[] userList = (CracUser[]) this.jsonConn.index("/user");
-		for(CracUser user : userList){
-			this.repository.save(user);
+		Project[] taskList = (Project[]) this.jsonConn.index("/project");
+		for(Project task : taskList){
+			this.repository.save(task);
 		}
 	}
 
-	public final void editCustomer(CracUser c) {
+	public final void editCustomer(Project c) {
 		final boolean persisted = c.getId() != null;
 		if (persisted) {
 			// Find fresh entity for editing
-			customer = repository.findOne(c.getId());
+			myProject = repository.findOne(c.getId());
 		}
 		else {
-			customer = c;
+			myProject = c;
 		}
 		cancel.setVisible(persisted);
 
 		// Bind customer properties to similarly named fields
 		// Could also use annotation or "manual binding" or programmatically
 		// moving values from fields to entities before saving
-		BeanFieldGroup.bindFieldsUnbuffered(customer, this);
+		BeanFieldGroup.bindFieldsUnbuffered(myProject, this);
 
 		setVisible(true);
 

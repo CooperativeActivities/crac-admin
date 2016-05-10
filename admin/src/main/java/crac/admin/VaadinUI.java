@@ -19,6 +19,14 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
+import crac.admin.daos.CustomerRepository;
+import crac.admin.daos.ProjectRepository;
+import crac.admin.daos.TaskRepository;
+import crac.admin.views.ProjectView;
+import crac.admin.views.StartView;
+import crac.admin.views.TaskView;
+import crac.admin.views.UserView;
+
 @SpringUI
 @Theme("valo")
 public class VaadinUI extends UI {
@@ -27,9 +35,13 @@ public class VaadinUI extends UI {
     protected static final String MAINVIEW = "main";
     
 	@Autowired
-	private CustomerRepository repo;
+	private CustomerRepository UserRepo;
 	
+	@Autowired
+	private TaskRepository taskRepo;
 
+	@Autowired
+	private ProjectRepository projectRepo;
 
     @Override
     protected void init(VaadinRequest request) {
@@ -40,8 +52,9 @@ public class VaadinUI extends UI {
 
         // Create and register the views
         navigator.addView("", new StartView(navigator));
-        navigator.addView("users", new UserView(navigator, repo));
-        //navigator.addView("main", new MainView());
+        navigator.addView("users", new UserView(navigator, UserRepo));
+        navigator.addView("tasks", new TaskView(navigator, taskRepo));
+        navigator.addView("projects", new ProjectView(navigator, projectRepo));
     }
 
 }
