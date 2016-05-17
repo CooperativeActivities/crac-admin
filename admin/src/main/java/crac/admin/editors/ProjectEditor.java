@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.event.ShortcutAction;
+import com.vaadin.navigator.Navigator;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
@@ -14,6 +15,7 @@ import com.vaadin.ui.DateField;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.themes.ValoTheme;
 
 import crac.admin.daos.CustomerRepository;
@@ -35,7 +37,7 @@ import crac.admin.models.Project;
 @SpringComponent
 @UIScope
 public class ProjectEditor extends VerticalLayout {
-
+	
 	private final ProjectRepository repository;
 
 	/**
@@ -51,6 +53,7 @@ public class ProjectEditor extends VerticalLayout {
 	DateField startTime = new DateField("Start-time");
 	DateField endTime = new DateField("End-time");
 
+
 	/* Action buttons */
 	Button save = new Button("Save", FontAwesome.SAVE);
 	Button update = new Button("Update", FontAwesome.ADJUST);
@@ -59,10 +62,18 @@ public class ProjectEditor extends VerticalLayout {
 	CssLayout actions = new CssLayout(save, update, cancel, delete);
 
 	@Autowired
-	public ProjectEditor(ProjectRepository repository) {
+	public ProjectEditor(ProjectRepository repository, Navigator navigator) {
 		this.repository = repository;
 		
-		addComponents(name, description, location, startTime, endTime, actions);
+		Button tasks = new Button("Tasks",
+	            new Button.ClickListener() {
+	        @Override
+	        public void buttonClick(ClickEvent event) {
+	            navigator.navigateTo("tasks/project/"+myProject.getId());
+	        }
+	    });
+
+		addComponents(name, description, location, startTime, endTime, tasks, actions);
 
 		// Configure and style components
 		setSpacing(true);

@@ -30,6 +30,8 @@ public class Task {
 	private int amountOfVolunteers;
 	
 	private String feedback;
+	
+	private Long superProjectId;
 
 	public Task(String name, String description, String location, Date startTime, Date endTime,
 			int urgency, int amountOfVolunteers, String feedback) {
@@ -79,22 +81,6 @@ public class Task {
 		this.location = location;
 	}
 
-	public Date getStartTime() {
-		return startTime;
-	}
-
-	public void setStartTime(Timestamp startTime) {
-		this.startTime = startTime;
-	}
-
-	public Date getEndTime() {
-		return endTime;
-	}
-
-	public void setEndTime(Timestamp endTime) {
-		this.endTime = endTime;
-	}
-
 	public int getUrgency() {
 		return urgency;
 	}
@@ -118,6 +104,32 @@ public class Task {
 	public void setFeedback(String feedback) {
 		this.feedback = feedback;
 	}
+
+
+	public Long getSuperProjectId() {
+		return superProjectId;
+	}
+
+	public void setSuperProjectId(long superProjectId) {
+		this.superProjectId = superProjectId;
+	}
+
+	public Date getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Date startTime) {
+		this.startTime = startTime;
+	}
+
+	public Date getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Date endTime) {
+		this.endTime = endTime;
+	}
+
 
 	
 	

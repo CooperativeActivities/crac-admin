@@ -32,7 +32,7 @@ import com.vaadin.ui.VerticalLayout;
 public class ProjectView extends VerticalLayout implements View {
 	
     public ProjectView(Navigator navigator, ProjectRepository repo) {
-    	ProjectEditor editor = new ProjectEditor(repo);
+    	ProjectEditor editor = new ProjectEditor(repo, navigator);
     	Grid grid = new Grid();
     	TextField filter = new TextField();
 		Button addNewBtn = new Button("New Project", FontAwesome.PLUS);

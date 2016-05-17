@@ -10,6 +10,7 @@ import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -32,6 +33,7 @@ import com.vaadin.ui.VerticalLayout;
 public class TaskView extends VerticalLayout implements View {
 	
     public TaskView(Navigator navigator, TaskRepository repo) {
+
     	TaskEditor editor = new TaskEditor(repo);
     	Grid grid = new Grid();
     	TextField filter = new TextField();
@@ -42,7 +44,10 @@ public class TaskView extends VerticalLayout implements View {
 		repo.deleteAll();
 		Task[] taskList = (Task[]) jsonConn.index("/task");
 		for(Task task : taskList){
-			repo.save(task);
+			System.out.println(task.getSuperProjectId());
+			if(task.getSuperProjectId().equals(Page.getCurrent().getUriFragment().replace("!tasks/project/", ""))){
+				repo.save(task);			
+			}
 		}
 		
 		Button menuButton = new Button("Back",
